@@ -79,10 +79,11 @@ def getEmailInfo(response_part):
 def processEmail(email_server, email_user, email_password, logfile, acl, use_acl, emailSubject):
 
     import smtplib
+    import imaplib
+    import os
     from email.mime.multipart import MIMEMultipart
     from email.mime.image import MIMEImage
     from email.mime.text import MIMEText
-    import imaplib
 
     try: 
         m = imaplib.IMAP4_SSL(email_server)
@@ -117,38 +118,37 @@ def processEmail(email_server, email_user, email_password, logfile, acl, use_acl
                     senderAddress, varSubject = getEmailInfo (response_part)
 
                 if accessPermitted(senderAddress, acl, use_acl):
-                    if 'sentry:logs' in varSubject.lower(): # logfile requested
+                    if 'cammy:logs' in varSubject.lower(): # logfile requested
                         datestr = get_date()
                         update_file("INFO: A copy of the logfile was requested by %s at %s \n" % (senderAddress, datestr), logfile)
                         sendEmail (senderAddress, emailSubject, email_user, email_server, email_password, logfile, logfile,"Here is a copy of the logfile contents:\n")
 
-                    elif 'sentry:help' in varSubject.lower(): # helprequested
+                    elif 'cammy:help' in varSubject.lower(): # helprequested
                         datestr = get_date()
                         helpMessage = "Help contents - include the following in email subject heading: \n\
-sentry:logs \t\t sends the logfile contents\n\
-sentry:resetlogs \t resets the logfile\n\
-sentry:shutdown \t shuts down the system\n\
-sentry:stop \t\t keeps polling for emails but stops motion detection\n\
-sentry:resume \t\t will resume motion detection\n\
-sentry:hires \t\t will capture a high resolution image and send back\n\
-sentry:restert \t\t will shut down the system for keeps\n\
-sentry:help \t\t will email this message back!"
+cammy:logs \t\t sends the logfile contents\n\
+cammy:resetlogs \t resets the logfile\n\
+cammy:shutdown \t shuts down the system\n\
+cammy:stop \t\t keeps polling for emails but stops motion detection\n\
+cammy:resume \t\t will resume motion detection\n\
+cammy:hires \t\t will capture a high resolution image and send back\n\
+cammy:restert \t\t will shut down the system for keeps\n\
+cammy:help \t\t will email this message back!"
                         sendEmail (senderAddress,'',helpMessage)
 
-                    elif 'sentry:resetlogs' in varSubject.lower(): # logfile requested
+                    elif 'cammy:resetlogs' in varSubject.lower(): # logfile requested
                         os.remove (logfile)
                         datestr = get_date()
                         update_file("INFO: A logfile reset was requested by %s at %s \n" % (senderAddress, datestr), logfile)
-                        sendEmail (senderAddress,logfile,"The logfile has been reset, here is the new logfile contents:\n")
-
-                    elif 'sentry:shutdown' in varSubject.lower(): # shutdown requested
+                        sendEmail (senderAddress, emailSubject, email_user, email_server, email_password, logfile, logfile,"The logfile has been reset, here is the new logfile contents:\n")
+                    elif 'cammy:shutdown' in varSubject.lower(): # shutdown requested
                         datestr = get_date()
                         update_file("INFO: A shutdown was requested by %s at %s \n" % (senderAddress, datestr), logfile)
                         sendEmail (senderAddress,'',"Your request to shut down the system is being actioned...\n")
                         tidy_flagfiles()
                         system_shutdown(logfile,restart=False)
 
-                    elif 'sentry:stop' in varSubject.lower(): # request to stop monitoring 
+                    elif 'cammy:stop' in varSubject.lower(): # request to stop monitoring 
                         datestr = get_date()
                         update_file("INFO: A request to stop monitoring was made by %s at %s \n" % (senderAddress, datestr), logfile)
 
@@ -159,7 +159,7 @@ sentry:help \t\t will email this message back!"
                         else:
                             sendEmail (senderAddress,'',"Since monitoring for motion was already stopped your request was not actioned...\n")
 
-                    elif 'sentry:resume' in varSubject.lower(): # request to resume monitoring 
+                    elif 'cammy:resume' in varSubject.lower(): # request to resume monitoring 
                         datestr = get_date()
                         update_file("INFO: A request to resume monitoring was made by %s at %s \n" % (senderAddress, datestr), logfile)
 
@@ -170,14 +170,14 @@ sentry:help \t\t will email this message back!"
                         else:
                             sendEmail (senderAddress,'',"Since monitoring for motion has not been stopped your request has not been actioned...\n")
 
-                    elif 'sentry:restart' in varSubject.lower(): # shutdown requested
+                    elif 'cammy:restart' in varSubject.lower(): # shutdown requested
                         datestr = get_date()
                         update_file("INFO: A reboot was requested by %s at %s \n" % (senderAddress, datestr), logfile)
                         sendEmail (senderAddress,'',"Your request to reboot the system is being actioned...\n")
                         tidy_flagfiles()
                         system_shutdown(logfile,restart=True)
 
-                    elif 'sentry:hires' in varSubject.lower(): # hi resolution photo requested
+                    elif 'cammy:hires' in varSubject.lower(): # hi resolution photo requested
                         photo_width = 2592 
                         photo_height = 1944
                         filename = saveImage (photo_width, photo_height)

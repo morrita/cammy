@@ -6,6 +6,7 @@
 import time
 import sys
 import os
+import signal
 from datetime import datetime
 from ConfigParser import SafeConfigParser
 
@@ -63,9 +64,15 @@ def readConfigFile(cfg_file):
     global dropbox_enabled; dropbox_enabled= parser.getboolean('DropboxSetup','dropbox_enabled') 
 
 
+def sigint_handler(signum, frame):
+    os.remove (running_flag) 
+    sys.exit("Now exiting because CTRL-C was detected")
+
 cfg_file = '/usr/local/bin/cammy/cammy.ini'
 
 readConfigFile(cfg_file) # read all global variables from external configuration file
+
+signal.signal(signal.SIGINT, sigint_handler)
 
 if verbose: 
     datestr = get_date()
@@ -78,7 +85,6 @@ if os.path.isfile(running_flag):
 
 else:
     open(running_flag, 'a').close()
-
 
 while True:
 
