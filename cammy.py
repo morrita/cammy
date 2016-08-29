@@ -4,8 +4,15 @@
 # date: August 2016
 
 import time
+import sys
+import os
+from datetime import datetime
 from ConfigParser import SafeConfigParser
 
+from cammy_lib import get_date
+from cammy_lib import update_file 
+from cammy_lib import checkNetworks
+from cammy_lib import processEmail
 
 def readConfigFile(cfg_file):
     # read variables from config file
@@ -60,17 +67,35 @@ cfg_file = '/usr/local/bin/cammy/cammy.ini'
 
 readConfigFile(cfg_file) # read all global variables from external configuration file
 
+if verbose: 
+    datestr = get_date()
+    update_file("INFO: program started in verbose mode at %s \n" % (datestr), logfile)
+
+if os.path.isfile(running_flag): 
+    datestr = get_date()
+    update_file("ERROR: Running flag %s detected at %s hence aborting\n" % (running_flag, datestr), logfile)
+    sys.exit("Now exiting because running_flag was detected")
+
+else:
+    open(running_flag, 'a').close()
+
+
 while True:
 
-    counter = 0
-    print "polling for email ..."
-    print email_polling
+    if checkNetworks(nw_checks, logfile):
+        networks_okay = True 
+        processEmail(email_server, email_user, email_password, logfile, acl, use_acl, emailSubject)
+    else:
+        networks_okay = False 
+        print "network failure detected ..."
 
+    n1 = datetime.now()
     while True:
-        print counter
-        counter += 1
-        time.sleep(0.5)
-        if counter > email_polling:
+        time.sleep (0.5)
+        print "detecting movement ..."
+        n2 = datetime.now()
+        elapsed_time = (n2 - n1).total_seconds()
+        if elapsed_time > email_polling:
             break
 
     print "inner loop ended"
