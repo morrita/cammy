@@ -3,6 +3,18 @@
 # version: 0.3 
 # date: July 2016
 
+
+def tidy_flagfiles(tidy_list,logfile):	# remove all files in tidy_list if they exist
+    import os
+    datestr = get_date()
+    for f in tidy_list:
+        if os.path.isfile(f):
+            update_file("INFO: removing file %s at %s \n" % (f,datestr), logfile)
+            os.remove(f)
+        else:
+            update_file("INFO: will not remove file %s as it does not exist at %s \n" % (f,datestr), logfile)
+
+
 def sendEmail(emailTo,emailSubject, email_user, email_server, email_password, logfile, filename='',first_line=''):
 
     import smtplib
@@ -76,7 +88,7 @@ def getEmailInfo(response_part):
 
     return (senderAddress, varSubject)
 
-def processEmail(email_server, email_user, email_password, logfile, acl, use_acl, emailSubject):
+def processEmail(email_server, email_user, email_password, logfile, acl, use_acl, emailSubject, verbose, stopfile, tidy_list):
 
     import smtplib
     import imaplib
@@ -116,16 +128,21 @@ def processEmail(email_server, email_user, email_password, logfile, acl, use_acl
                 if isinstance(response_part, tuple):	# if the part is a tuple then read email info
 
                     senderAddress, varSubject = getEmailInfo (response_part)
-
-                if accessPermitted(senderAddress, acl, use_acl):
-                    if 'cammy:logs' in varSubject.lower(): # logfile requested
+                    
+                    if verbose:
                         datestr = get_date()
-                        update_file("INFO: A copy of the logfile was requested by %s at %s \n" % (senderAddress, datestr), logfile)
-                        sendEmail (senderAddress, emailSubject, email_user, email_server, email_password, logfile, logfile,"Here is a copy of the logfile contents:\n")
+                        update_file("INFO: email received from %s, subject = %s,  at %s \n" % (senderAddress, varSubject, datestr), logfile)
 
-                    elif 'cammy:help' in varSubject.lower(): # helprequested
-                        datestr = get_date()
-                        helpMessage = "Help contents - include the following in email subject heading: \n\
+                    if accessPermitted(senderAddress, acl, use_acl):
+
+                        if 'cammy:logs' in varSubject.lower(): # logfile requested
+                            datestr = get_date()
+                            update_file("INFO: A copy of the logfile was requested by %s at %s \n" % (senderAddress, datestr), logfile)
+                            sendEmail (senderAddress, emailSubject, email_user, email_server, email_password, logfile, logfile,"Here is a copy of the logfile contents:\n")
+
+                        elif 'cammy:help' in varSubject.lower(): # helprequested
+                            datestr = get_date()
+                            helpMessage = "Help contents - include the following in email subject heading: \n\
 cammy:logs \t\t sends the logfile contents\n\
 cammy:resetlogs \t resets the logfile\n\
 cammy:shutdown \t shuts down the system\n\
@@ -134,66 +151,66 @@ cammy:resume \t\t will resume motion detection\n\
 cammy:hires \t\t will capture a high resolution image and send back\n\
 cammy:restert \t\t will shut down the system for keeps\n\
 cammy:help \t\t will email this message back!"
-                        sendEmail (senderAddress,'',helpMessage)
+                            sendEmail (senderAddress,'',helpMessage)
 
-                    elif 'cammy:resetlogs' in varSubject.lower(): # logfile requested
-                        os.remove (logfile)
-                        datestr = get_date()
-                        update_file("INFO: A logfile reset was requested by %s at %s \n" % (senderAddress, datestr), logfile)
-                        sendEmail (senderAddress, emailSubject, email_user, email_server, email_password, logfile, logfile,"The logfile has been reset, here is the new logfile contents:\n")
-                    elif 'cammy:shutdown' in varSubject.lower(): # shutdown requested
-                        datestr = get_date()
-                        update_file("INFO: A shutdown was requested by %s at %s \n" % (senderAddress, datestr), logfile)
-                        sendEmail (senderAddress,'',"Your request to shut down the system is being actioned...\n")
-                        tidy_flagfiles()
-                        system_shutdown(logfile,restart=False)
+                        elif 'cammy:resetlogs' in varSubject.lower(): # logfile reset requested
+                            os.remove (logfile)
+                            datestr = get_date()
+                            update_file("INFO: A logfile reset was requested by %s at %s \n" % (senderAddress, datestr), logfile)
+                            sendEmail (senderAddress, emailSubject, email_user, email_server, email_password, logfile, logfile,"The logfile has been reset, here is the new logfile contents:\n")
+                        elif 'cammy:shutdown' in varSubject.lower(): # shutdown requested
+                            datestr = get_date()
+                            update_file("INFO: A shutdown was requested by %s at %s \n" % (senderAddress, datestr), logfile)
+                            sendEmail (senderAddress, emailSubject, email_user, email_server, email_password, logfile, '',"Your request to shut down the system has been actioned\n")
+                            tidy_flagfiles(tidy_list, logfile)
+                            system_shutdown(logfile,restart=False)
 
-                    elif 'cammy:stop' in varSubject.lower(): # request to stop monitoring 
-                        datestr = get_date()
-                        update_file("INFO: A request to stop monitoring was made by %s at %s \n" % (senderAddress, datestr), logfile)
+                        elif 'cammy:stop' in varSubject.lower(): # request to stop monitoring 
+                            datestr = get_date()
+                            update_file("INFO: A request to stop monitoring was made by %s at %s \n" % (senderAddress, datestr), logfile)
 
-                        if (not os.path.isfile(stopfile)):
-                            open(stopfile, 'a').close()  # create running flag file
-                            sendEmail (senderAddress,'',"Your request to stop monitoring for motion has actioned...\n")
+                            if (not os.path.isfile(stopfile)):
+                                open(stopfile, 'a').close()  # create stop file
+                                sendEmail (senderAddress, emailSubject, email_user, email_server, email_password, logfile, '',"Your request to stop detecting motion has been actioned\n")
+
+                            else:
+                                sendEmail (senderAddress, emailSubject, email_user, email_server, email_password, logfile, '',"Your request to stop detecting motion has not been actioned since it was already stopped\n")
+
+                        elif 'cammy:resume' in varSubject.lower(): # request to resume monitoring 
+                            datestr = get_date()
+                            update_file("INFO: A request to resume monitoring was made by %s at %s \n" % (senderAddress, datestr), logfile)
+
+                            if os.path.isfile(stopfile):
+                                os.remove(stopfile)
+                                sendEmail (senderAddress, emailSubject, email_user, email_server, email_password, logfile, '',"Your request to resume detecting motion has been actioned\n")
+
+                            else:
+                                sendEmail (senderAddress, emailSubject, email_user, email_server, email_password, logfile, '',"Your request to resume detecting motion has not been actioned as it was not stopped\n")
+
+                        elif 'cammy:restart' in varSubject.lower(): # shutdown requested
+                            datestr = get_date()
+                            update_file("INFO: A reboot was requested by %s at %s \n" % (senderAddress, datestr), logfile)
+                            sendEmail (senderAddress, emailSubject, email_user, email_server, email_password, logfile, '',"Your request to reboot the system has been actioned\n")
+                            tidy_flagfiles(tidy_list, logfile)
+                            system_shutdown(logfile,restart=True)
+
+                        elif 'cammy:hires' in varSubject.lower(): # hi resolution photo requested
+                            photo_width = 2592 
+                            photo_height = 1944
+                            filename = saveImage (photo_width, photo_height)
+                            sendEmail (senderAddress,filename,"A high resolution photo was requested - please find the attached image:\n")
+                            os.remove (filename)
 
                         else:
-                            sendEmail (senderAddress,'',"Since monitoring for motion was already stopped your request was not actioned...\n")
-
-                    elif 'cammy:resume' in varSubject.lower(): # request to resume monitoring 
-                        datestr = get_date()
-                        update_file("INFO: A request to resume monitoring was made by %s at %s \n" % (senderAddress, datestr), logfile)
-
-                        if os.path.isfile(stopfile):
-                            os.remove(stopfile)
-                            sendEmail (senderAddress,'',"Your request to resume monitoring for motion has been actioned...\n")
-
-                        else:
-                            sendEmail (senderAddress,'',"Since monitoring for motion has not been stopped your request has not been actioned...\n")
-
-                    elif 'cammy:restart' in varSubject.lower(): # shutdown requested
-                        datestr = get_date()
-                        update_file("INFO: A reboot was requested by %s at %s \n" % (senderAddress, datestr), logfile)
-                        sendEmail (senderAddress,'',"Your request to reboot the system is being actioned...\n")
-                        tidy_flagfiles()
-                        system_shutdown(logfile,restart=True)
-
-                    elif 'cammy:hires' in varSubject.lower(): # hi resolution photo requested
-                        photo_width = 2592 
-                        photo_height = 1944
-                        filename = saveImage (photo_width, photo_height)
-                        sendEmail (senderAddress,filename,"A high resolution photo was requested - please find the attached image:\n")
-                        os.remove (filename)
+                            filename = saveImage (photo_width, photo_height)
+                            sendEmail (senderAddress,filename,"A standard image photo was requested - please find attached image:\n")
+                            os.remove (filename)
 
                     else:
-                        filename = saveImage (photo_width, photo_height)
-                        sendEmail (senderAddress,filename,"A standard image photo was requested - please find attached image:\n")
-                        os.remove (filename)
+                        datestr = get_date()
+                        update_file("WARN: Email address %s not recognised at %s \n" % (senderAddress,datestr), logfile)
 
-                else:
-                    datestr = get_date()
-                    update_file("WARN: Email address %s not recognised at %s \n" % (senderAddress,datestr), logfile)
-
-            m.logout()
+        m.logout()
 
 
 

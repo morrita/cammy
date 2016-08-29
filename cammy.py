@@ -89,20 +89,25 @@ else:
 while True:
 
     if checkNetworks(nw_checks, logfile):
+        print "Procesing email ..."
         networks_okay = True 
-        processEmail(email_server, email_user, email_password, logfile, acl, use_acl, emailSubject)
+        processEmail(email_server, email_user, email_password, logfile, acl, use_acl, emailSubject, verbose, stopfile, tidy_list)
     else:
         networks_okay = False 
         print "network failure detected ..."
 
-    n1 = datetime.now()
-    while True:
-        time.sleep (0.5)
-        print "detecting movement ..."
-        n2 = datetime.now()
-        elapsed_time = (n2 - n1).total_seconds()
-        if elapsed_time > email_polling:
-            break
-
-    print "inner loop ended"
+    if (not os.path.isfile(stopfile)): # if monitoring has not bee instructed to stop
+        n1 = datetime.now()
+        while True:
+            time.sleep (0.5)
+            print "detecting movement ..."
+            n2 = datetime.now()
+            elapsed_time = (n2 - n1).total_seconds()
+            if elapsed_time > email_polling:
+                break
+    else:
+        time.sleep (10)
+        if verbose:
+            datestr = get_date()
+            update_file("INFO: Stop flag %s detected at %s hence aborting\n" % (stopfile, datestr), logfile)
 
