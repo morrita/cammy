@@ -4,7 +4,38 @@
 # date: July 2016
 
 
-def saveImage(photo_width, photo_height, pct_quality):
+def detect_motion(photo_width, photo_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold):
+
+     import os
+
+     # Get first image
+     image1, buffer1 = captureTestImage()
+
+     # Get comparison image
+     image2, buffer2 = captureTestImage()
+
+     changedPixels = 0
+     for x in xrange(0, test_width):
+         # Scan one line of image then check sensitivity for movement
+         for y in xrange(0, test_height):
+             # Check green as it's the highest quality channel
+             pixdiff = abs(buffer1[x, y][1] - buffer2[x, y][1])
+             if pixdiff > threshold:
+                 changedPixels += 1
+
+                 if changedPixels > sensitivity:
+                      filename = saveImage(photo_width, photo_height, pct_quality, filepath, filenamePrefix, logfile)
+                      sendEmail (email_alert_user,filename,'Motion detected!Here is the captured image:\n')
+                      os.remove (filename)
+                      datestr = get_date()
+                      update_file("INFO: Alert! Motion was detected at %s \n" % (datestr), logfile)
+                      update_file("INFO: changedPixels = %s , sensitivity = %s , threshold = %s \n" % (str(changedPixels), str(sensitivity), str(threshold)), logfile)
+                      changedPixels = 0
+                      break
+
+def saveImage(photo_width, photo_height, pct_quality, filepath, filenamePrefix, logfile):
+
+    import subprocess
     datestr = get_date()
     filename = filepath + "/" + filenamePrefix + "_" + str(photo_width) + "x" + str(photo_height) + "_" + datestr + ".jpg"
     subprocess.call("raspistill -mm matrix -w %d -h %d -e jpg -q %d -o %s" % (photo_width, photo_height, pct_quality, filename), shell=True)
@@ -31,6 +62,7 @@ def sendEmail(emailTo,emailSubject, email_user, email_server, email_password, lo
     from email.mime.image import MIMEImage
     from email.mime.text import MIMEText
     import imaplib
+    import os
 
     datestr = get_date()
     # Create the container (outer) email message
@@ -97,7 +129,7 @@ def getEmailInfo(response_part):
 
     return (senderAddress, varSubject)
 
-def processEmail(email_server, email_user, email_password, logfile, acl, use_acl, emailSubject, verbose, stopfile, tidy_list, photo_width, photo_height, pct_quality):
+def processEmail(email_server, email_user, email_password, logfile, acl, use_acl, emailSubject, verbose, stopfile, tidy_list, photo_width, photo_height, pct_quality, filepath, filenamePrefix):
 
     import smtplib
     import imaplib
@@ -157,7 +189,6 @@ cammy:resetlogs \t resets the logfile\n\
 cammy:shutdown \t shuts down the system\n\
 cammy:stop \t\t keeps polling for emails but stops motion detection\n\
 cammy:resume \t\t will resume motion detection\n\
-cammy:hires \t\t will capture a high resolution image and send back\n\
 cammy:restert \t\t will shut down the system for keeps\n\
 cammy:help \t\t will email this message back!"
                             sendEmail (senderAddress, emailSubject, email_user, email_server, email_password, logfile,'',helpMessage)
@@ -203,15 +234,8 @@ cammy:help \t\t will email this message back!"
                             tidy_flagfiles(tidy_list, logfile)
                             system_shutdown(logfile,restart=True)
 
-                        elif 'cammy:hires' in varSubject.lower(): # hi resolution photo requested
-                            photo_width = 2592 
-                            photo_height = 1944
-                            filename = saveImage (photo_width, photo_height)
-                            sendEmail (senderAddress,filename,"A high resolution photo was requested - please find the attached image:\n")
-                            os.remove (filename)
-
                         else:
-                            filename = saveImage (photo_width, photo_height, pct_quality)
+                            filename = saveImage (photo_width, photo_height, pct_quality, filepath, filenamePrefix, logfile)
                             sendEmail (senderAddress, emailSubject, email_user, email_server, email_password, logfile, filename,"A standard image photo was requested - please find the attached image\n")
                             os.remove (filename)
 
