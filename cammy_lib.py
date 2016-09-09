@@ -4,6 +4,15 @@
 # date: July 2016
 
 
+def saveImage(photo_width, photo_height, pct_quality):
+    datestr = get_date()
+    filename = filepath + "/" + filenamePrefix + "_" + str(photo_width) + "x" + str(photo_height) + "_" + datestr + ".jpg"
+    subprocess.call("raspistill -mm matrix -w %d -h %d -e jpg -q %d -o %s" % (photo_width, photo_height, pct_quality, filename), shell=True)
+
+    update_file("INFO: Captured %s at %s \n" % (filename,datestr), logfile)
+
+    return (filename)
+
 def tidy_flagfiles(tidy_list,logfile):	# remove all files in tidy_list if they exist
     import os
     datestr = get_date()
@@ -88,7 +97,7 @@ def getEmailInfo(response_part):
 
     return (senderAddress, varSubject)
 
-def processEmail(email_server, email_user, email_password, logfile, acl, use_acl, emailSubject, verbose, stopfile, tidy_list):
+def processEmail(email_server, email_user, email_password, logfile, acl, use_acl, emailSubject, verbose, stopfile, tidy_list, photo_width, photo_height, pct_quality):
 
     import smtplib
     import imaplib
@@ -151,7 +160,7 @@ cammy:resume \t\t will resume motion detection\n\
 cammy:hires \t\t will capture a high resolution image and send back\n\
 cammy:restert \t\t will shut down the system for keeps\n\
 cammy:help \t\t will email this message back!"
-                            sendEmail (senderAddress,'',helpMessage)
+                            sendEmail (senderAddress, emailSubject, email_user, email_server, email_password, logfile,'',helpMessage)
 
                         elif 'cammy:resetlogs' in varSubject.lower(): # logfile reset requested
                             os.remove (logfile)
@@ -202,8 +211,8 @@ cammy:help \t\t will email this message back!"
                             os.remove (filename)
 
                         else:
-                            filename = saveImage (photo_width, photo_height)
-                            sendEmail (senderAddress,filename,"A standard image photo was requested - please find attached image:\n")
+                            filename = saveImage (photo_width, photo_height, pct_quality)
+                            sendEmail (senderAddress, emailSubject, email_user, email_server, email_password, logfile, filename,"A standard image photo was requested - please find the attached image\n")
                             os.remove (filename)
 
                     else:

@@ -91,7 +91,7 @@ while True:
     if checkNetworks(nw_checks, logfile):
         print "Procesing email ..."
         networks_okay = True 
-        processEmail(email_server, email_user, email_password, logfile, acl, use_acl, emailSubject, verbose, stopfile, tidy_list)
+        processEmail(email_server, email_user, email_password, logfile, acl, use_acl, emailSubject, verbose, stopfile, tidy_list, photo_width, photo_height, pct_quality)
     else:
         networks_okay = False 
         print "network failure detected ..."
