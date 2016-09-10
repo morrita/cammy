@@ -4,15 +4,32 @@
 # date: July 2016
 
 
-def detect_motion(photo_width, photo_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold):
+def captureTestImage(test_width, test_height):
+
+    import subprocess
+    import StringIO
+    from PIL import Image
+
+    command = "raspistill -w %s -h %s -t 1 -e bmp -o -" % (test_width, test_height)
+    imageData = StringIO.StringIO()
+    imageData.write(subprocess.check_output(command, shell=True))
+    imageData.seek(0)
+    im = Image.open(imageData)
+    buffer = im.load()
+    imageData.close()
+
+    return im, buffer
+
+
+def detect_motion(photo_width, photo_height,test_width, test_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold):
 
      import os
 
      # Get first image
-     image1, buffer1 = captureTestImage()
+     image1, buffer1 = captureTestImage(test_width, test_height)
 
      # Get comparison image
-     image2, buffer2 = captureTestImage()
+     image2, buffer2 = captureTestImage(test_width, test_height)
 
      changedPixels = 0
      for x in xrange(0, test_width):
@@ -25,13 +42,8 @@ def detect_motion(photo_width, photo_height, pct_quality, filepath, filenamePref
 
                  if changedPixels > sensitivity:
                       filename = saveImage(photo_width, photo_height, pct_quality, filepath, filenamePrefix, logfile)
-                      sendEmail (email_alert_user,filename,'Motion detected!Here is the captured image:\n')
-                      os.remove (filename)
-                      datestr = get_date()
-                      update_file("INFO: Alert! Motion was detected at %s \n" % (datestr), logfile)
-                      update_file("INFO: changedPixels = %s , sensitivity = %s , threshold = %s \n" % (str(changedPixels), str(sensitivity), str(threshold)), logfile)
-                      changedPixels = 0
-                      break
+                      return (filename) 
+     return('')
 
 def saveImage(photo_width, photo_height, pct_quality, filepath, filenamePrefix, logfile):
 

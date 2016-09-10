@@ -14,6 +14,8 @@ from cammy_lib import get_date
 from cammy_lib import update_file 
 from cammy_lib import checkNetworks
 from cammy_lib import processEmail
+from cammy_lib import sendEmail
+from cammy_lib import detect_motion 
 
 def readConfigFile(cfg_file):
     # read variables from config file
@@ -89,7 +91,6 @@ else:
 while True:
 
     if checkNetworks(nw_checks, logfile):
-        print "Procesing email ..."
         networks_okay = True 
         processEmail(email_server, email_user, email_password, logfile, acl, use_acl, emailSubject, verbose, stopfile, tidy_list, photo_width, photo_height, pct_quality, filepath, filenamePrefix)
     else:
@@ -99,8 +100,14 @@ while True:
     if (not os.path.isfile(stopfile)): # if monitoring has not bee instructed to stop
         n1 = datetime.now()
         while True:
-            time.sleep (0.5)
-            print "detecting movement ..."
+
+            filename = detect_motion(photo_width, photo_height,test_width, test_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold)
+            if filename and networks_okay:
+                sendEmail(email_alert_user,emailSubject, email_user, email_server, email_password, logfile, filename,first_line='Motion detected! Please find attached image:')
+                datestr = get_date()
+                update_file("INFO: Motion detected! File %s emailed to %s at %s\n" % (filename, email_alert_user, datestr), logfile)
+                os.remove(filename)
+
             n2 = datetime.now()
             elapsed_time = (n2 - n1).total_seconds()
             if elapsed_time > email_polling:
