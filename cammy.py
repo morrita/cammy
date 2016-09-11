@@ -16,6 +16,7 @@ from cammy_lib import checkNetworks
 from cammy_lib import processEmail
 from cammy_lib import sendEmail
 from cammy_lib import detect_motion 
+from cammy_lib import dropbox_upload 
 
 def readConfigFile(cfg_file):
     # read variables from config file
@@ -68,13 +69,23 @@ def readConfigFile(cfg_file):
 
 def sigint_handler(signum, frame):
     os.remove (running_flag) 
+    datestr = get_date()
+    update_file("INFO: program received an interrupt signal at %s \n" % (datestr), logfile)
     sys.exit("Now exiting because CTRL-C was detected")
+
+
+def sighup_handler(signum, frame):
+    os.remove (running_flag) 
+    datestr = get_date()
+    update_file("INFO: program received a HUP signal at %s \n" % (datestr), logfile)
+    sys.exit("Now exiting because an HUP signal was received")
 
 cfg_file = '/usr/local/bin/cammy/cammy.ini'
 
 readConfigFile(cfg_file) # read all global variables from external configuration file
 
 signal.signal(signal.SIGINT, sigint_handler)
+signal.signal(signal.SIGHUP, sighup_handler)
 
 if verbose: 
     datestr = get_date()
@@ -101,11 +112,15 @@ while True:
         n1 = datetime.now()
         while True:
 
-            filename = detect_motion(photo_width, photo_height,test_width, test_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold)
+            filename = detect_motion(photo_width, photo_height,test_width, test_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold, verbose)
             if filename and networks_okay:
                 sendEmail(email_alert_user,emailSubject, email_user, email_server, email_password, logfile, filename,first_line='Motion detected! Please find attached image:')
                 datestr = get_date()
                 update_file("INFO: Motion detected! File %s emailed to %s at %s\n" % (filename, email_alert_user, datestr), logfile)
+
+                if dropbox_enabled:
+                    dropbox_upload(verbose, logfile, dropbox_app, dropbox_token, filename)
+
                 os.remove(filename)
 
             n2 = datetime.now()

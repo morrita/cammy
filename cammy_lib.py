@@ -9,6 +9,7 @@ def captureTestImage(test_width, test_height):
     import subprocess
     import StringIO
     from PIL import Image
+ 
 
     command = "raspistill -w %s -h %s -t 1 -e bmp -o -" % (test_width, test_height)
     imageData = StringIO.StringIO()
@@ -21,9 +22,14 @@ def captureTestImage(test_width, test_height):
     return im, buffer
 
 
-def detect_motion(photo_width, photo_height,test_width, test_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold):
+def detect_motion(photo_width, photo_height,test_width, test_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold, verbose):
 
      import os
+
+     if verbose:
+         datestr = get_date()
+         message = "INFO: now executing motion detection routine at " + datestr  + "\n"
+         update_file (message, logfile)
 
      # Get first image
      image1, buffer1 = captureTestImage(test_width, test_height)
@@ -149,6 +155,11 @@ def processEmail(email_server, email_user, email_password, logfile, acl, use_acl
     from email.mime.multipart import MIMEMultipart
     from email.mime.image import MIMEImage
     from email.mime.text import MIMEText
+
+    if verbose:
+        datestr = get_date()
+        message = "INFO: now executing processEmail function at " + datestr + "\n"
+        update_file (message, logfile)
 
     try: 
         m = imaplib.IMAP4_SSL(email_server)
