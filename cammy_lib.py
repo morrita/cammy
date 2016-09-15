@@ -152,6 +152,7 @@ def processEmail(email_server, email_user, email_password, logfile, acl, use_acl
     import smtplib
     import imaplib
     import os
+    import sys
     from email.mime.multipart import MIMEMultipart
     from email.mime.image import MIMEImage
     from email.mime.text import MIMEText
@@ -166,14 +167,14 @@ def processEmail(email_server, email_user, email_password, logfile, acl, use_acl
     except:
         datestr = get_date()
         update_file("ERROR: failed to create IMAP_SSL object for email server %s at %s \n" % (email_server,datestr), logfile)
-        sys.exit(1)
+        return (False)
 
     try:
         rv, data = m.login(email_user, email_password)
     except imaplib.IMAP4.error:
         datestr = get_date()
         update_file("ERROR: IMAP login to %s as %s failed at %s \n" % (email_server,email_user,datestr), logfile)
-        sys.exit(1)
+        return (False)
 
     m.select('inbox')
     typ, data = m.search(None, "UNSEEN")
@@ -267,6 +268,7 @@ cammy:help \t\t will email this message back!"
                         update_file("WARN: Email address %s not recognised at %s \n" % (senderAddress,datestr), logfile)
 
         m.logout()
+    return (True)
 
 
 
