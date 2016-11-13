@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # name: cammy.py
-# version: 0.1 
-# date: August 2016
+# version: 0.2 
+# date: November 2016
 
 import time
 import sys

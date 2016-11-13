@@ -13,3 +13,5 @@ update-rc.d: using dependency based boot sequencing
 
 3) configure /usr/local/bin/cammy/cammy.ini
 
+4) install Python libraries: 
+pip install dropbox
