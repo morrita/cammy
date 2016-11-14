@@ -6,9 +6,9 @@ Installation Instructions:
 
 2) configure the init scripting: 
 
-pi@pi /etc/init.d $ sudo cp /usr/local/bin/cammy/cammy.sh /etc/init.d
-pi@pi /etc/init.d $ sudo chmod 755 /etc/init.d/cammy.sh
-pi@pi /etc/init.d $ sudo update-rc.d cammy.sh defaults
+sudo cp /usr/local/bin/cammy/cammy.sh /etc/init.d
+sudo chmod 755 /etc/init.d/cammy.sh
+sudo update-rc.d cammy.sh defaults
 update-rc.d: using dependency based boot sequencing
 
 3) configure /usr/local/bin/cammy/cammy.ini

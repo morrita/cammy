@@ -368,10 +368,13 @@ def dropbox_upload(verbose,logfile,appname,token,uploadfile):
     if os.path.isfile(uploadfile):
       with open(uploadfile, 'rb') as f:
 
-        filename = '/' + os.path.basename(uploadfile)
+        filename = '/uploads' + os.path.basename(uploadfile)
+        if verbose:
+           message = "INFO: filename =  " + filename + " uploadfile = " + uploadfile +  " \n"
+           update_file (message, logfile)
 
         try:
-            dbx.files_upload(f, filename, dropbox.files.WriteMode.overwrite)
+            dbx.files_upload(f.read(), filename, mode=WriteMode('overwrite'))
             if verbose:
                message = "INFO: successfully uploaded file " + uploadfile + " as " + filename + " to Dropbox within application " + appname + " \n"
                update_file (message, logfile)
