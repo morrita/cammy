@@ -65,6 +65,7 @@ def readConfigFile(cfg_file):
     global dropbox_token; dropbox_token= parser.get('DropboxSetup','dropbox_token') 
     global dropbox_app; dropbox_app= parser.get('DropboxSetup','dropbox_app') 
     global dropbox_enabled; dropbox_enabled= parser.getboolean('DropboxSetup','dropbox_enabled') 
+    global dropbox_folder; dropbox_folder= parser.get('DropboxSetup','dropbox_folder') 
 
 
 def sigint_handler(signum, frame):
@@ -136,7 +137,7 @@ while True:
                 update_file("INFO: Motion detected! File %s emailed to %s at %s\n" % (filename, email_alert_user, datestr), logfile)
 
                 if dropbox_enabled:
-                    dropbox_upload(verbose, logfile, dropbox_app, dropbox_token, filename)
+                    dropbox_upload(verbose, logfile, dropbox_app, dropbox_token, filename, dropbox_folder)
 
                 os.remove(filename)
 

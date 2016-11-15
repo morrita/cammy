@@ -350,7 +350,7 @@ def system_shutdown(logfile,restart):
     output = process.communicate()[0]
 
 
-def dropbox_upload(verbose,logfile,appname,token,uploadfile):
+def dropbox_upload(verbose,logfile,appname,token,uploadfile,dropbox_folder):
     
   if verbose:
     message = "INFO: using appname = " + appname + " to upload to Dropbox\n"
@@ -368,7 +368,7 @@ def dropbox_upload(verbose,logfile,appname,token,uploadfile):
     if os.path.isfile(uploadfile):
       with open(uploadfile, 'rb') as f:
 
-        filename = '/uploads/' + os.path.basename(uploadfile)
+        filename = dropbox_folder + os.path.basename(uploadfile)
         if verbose:
             message = "INFO: filename =  " + filename + " uploadfile = " + uploadfile +  " \n"
             update_file (message, logfile)
@@ -389,3 +389,26 @@ def dropbox_upload(verbose,logfile,appname,token,uploadfile):
   except AuthError as err:
     message = "ERROR: Invalid Dropbox access token\n"
     update_file (message, logfile)
+
+
+def dropbox_cleanup(verbose,logfile,appname,token,dropbox_folder,dropbox_keep_files):
+    
+  if verbose:
+    message = "INFO: using appname = " + appname + " to cleanup Dropbox\n"
+    update_file (message, logfile)
+
+  import dropbox
+  import os.path
+  from dropbox.exceptions import ApiError, AuthError
+  from dropbox.files import WriteMode
+
+  dbx = dropbox.Dropbox(token)
+
+  counter = 1
+  for entry in dbx.files_list_folder(dropbox_folder).entries:
+    print 'entry %d = %s dropbox_keep_files = %d' % (counter,entry.name,dropbox_keep_files)
+
+    if (counter > dropbox_keep_files):
+      print 'delete this file'
+
+    counter += 1
