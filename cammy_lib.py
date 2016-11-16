@@ -403,12 +403,18 @@ def dropbox_cleanup(verbose,logfile,appname,token,dropbox_folder,dropbox_keep_fi
   from dropbox.files import WriteMode
 
   dbx = dropbox.Dropbox(token)
+  file_list = dbx.files_list_folder(dropbox_folder).entries
 
-  counter = 1
-  for entry in dbx.files_list_folder(dropbox_folder).entries:
-    print 'entry %d = %s dropbox_keep_files = %d' % (counter,entry.name,dropbox_keep_files)
+  counter = 0
+  num_files = len(file_list)
+  counter_threshold = num_files - dropbox_keep_files
 
-    if (counter > dropbox_keep_files):
-      print 'delete this file'
+  while counter < num_files:
 
-    counter += 1
+      if counter < counter_threshold:
+          delfile = dropbox_folder + file_list[counter].name
+          message = "INFO: deleting file " + delfile + " from Dropbox\n"
+          update_file (message, logfile)
+          dbx.files_delete(delfile)
+   
+      counter += 1
