@@ -31,12 +31,15 @@ def detect_motion(photo_width, photo_height,test_width, test_height, pct_quality
          message = "INFO: now executing motion detection routine at " + datestr  + "\n"
          update_file (message, logfile)
 
+     t1 = datetime.now()
      # Get first image
      image1, buffer1 = captureTestImage(test_width, test_height)
 
+     t2 = datetime.now()
      # Get comparison image
      image2, buffer2 = captureTestImage(test_width, test_height)
 
+     t3 = datetime.now()
      changedPixels = 0
      for x in xrange(0, test_width):
          # Scan one line of image then check sensitivity for movement
@@ -49,6 +52,19 @@ def detect_motion(photo_width, photo_height,test_width, test_height, pct_quality
                  if changedPixels > sensitivity:
                       filename = saveImage(photo_width, photo_height, pct_quality, filepath, filenamePrefix, logfile)
                       return (filename) 
+     t4 = datetime.now()
+
+     if verbose:
+
+         elapsed_time1 = (t2 - t1).total_seconds()
+         elapsed_time2 = (t3 - t2).total_seconds()
+         elapsed_time3 = (t4 - t3).total_seconds()
+         datestr = get_date()
+         message = "INFO: image1 capture took " + elapsed_time1 + "S, image2 capture took " + elapsed_time2 + "S, image processing took " + elapsed_time3 +  "S at " + datestr + "\n"
+         update_file (message, logfile)
+
+
+
      return('')
 
 def saveImage(photo_width, photo_height, pct_quality, filepath, filenamePrefix, logfile):
