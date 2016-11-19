@@ -17,6 +17,7 @@ from cammy_lib import processEmail
 from cammy_lib import sendEmail
 from cammy_lib import detect_motion 
 from cammy_lib import dropbox_upload 
+from cammy_lib import dropbox_cleanup
 
 def readConfigFile(cfg_file):
     # read variables from config file
@@ -138,6 +139,7 @@ while True:
 
                 if dropbox_enabled:
                     dropbox_upload(verbose, logfile, dropbox_app, dropbox_token, filename, dropbox_folder)
+                    dropbox_cleanup(verbose,logfile,dropbox_app,dropbox_token,dropbox_folder, dropbox_keep_files) 
 
                 os.remove(filename)
 
