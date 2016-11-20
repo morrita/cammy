@@ -25,6 +25,7 @@ def captureTestImage(test_width, test_height):
 def detect_motion(photo_width, photo_height,test_width, test_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold, verbose):
 
      import os
+     from datetime import datetime
 
      if verbose:
          datestr = get_date()
@@ -56,11 +57,11 @@ def detect_motion(photo_width, photo_height,test_width, test_height, pct_quality
 
      if verbose:
 
-         elapsed_time1 = (t2 - t1).total_seconds()
-         elapsed_time2 = (t3 - t2).total_seconds()
-         elapsed_time3 = (t4 - t3).total_seconds()
+         elapsed_time1 = str((t2 - t1).total_seconds())
+         elapsed_time2 = str((t3 - t2).total_seconds())
+         elapsed_time3 = str((t4 - t3).total_seconds())
          datestr = get_date()
-         message = "INFO: image1 capture took " + elapsed_time1 + "S, image2 capture took " + elapsed_time2 + "S, image processing took " + elapsed_time3 +  "S at " + datestr + "\n"
+         message = "INFO: image1 capture took " + elapsed_time1 + " Secs, image2 capture took " + elapsed_time2 + " Secs, image processing took " + elapsed_time3 +  " Secs at " + datestr + "\n"
          update_file (message, logfile)
 
 
