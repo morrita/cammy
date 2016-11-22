@@ -7,6 +7,7 @@ from cammy_lib import update_file
 from cammy_lib import dropbox_upload 
 from cammy_lib import dropbox_cleanup
 from cammy_lib import saveImage 
+from cammy_lib import saveFilm
 
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -79,16 +80,28 @@ def readConfigFile():
     global dropbox_enabled; dropbox_enabled= parser.getboolean('DropboxSetup','dropbox_enabled') 
     global dropbox_folder; dropbox_folder= parser.get('DropboxSetup','dropbox_folder')
     global dropbox_keep_files; dropbox_keep_files= parser.getint('DropboxSetup','dropbox_keep_files')
+    global film_duration; film_duration= parser.getint('DropboxSetup','film_duration')
+    global film_enable; film_enable= parser.getboolean('DropboxSetup','film_enable')
+
 
 
 readConfigFile() # read all global variables from external configuration file
 
-filename = saveImage(photo_width, photo_height, pct_quality, filepath, filenamePrefix, logfile)
 
 if dropbox_enabled:
-  dropbox_upload(verbose, logfile, dropbox_app, dropbox_token, filename, dropbox_folder)
-  dropbox_cleanup(verbose,logfile,dropbox_app,dropbox_token,dropbox_folder, dropbox_keep_files)
-  os.remove(filename)
+
+  if film_enable:
+    filename = saveFilm(photo_width, photo_height, filepath, filenamePrefix, logfile, film_duration)
+    dropbox_upload(verbose, logfile, dropbox_app, dropbox_token, filename, dropbox_folder)
+    dropbox_cleanup(verbose,logfile,dropbox_app,dropbox_token,dropbox_folder, dropbox_keep_files)
+    os.remove(filename)
+
+  else:
+
+    filename = saveImage(photo_width, photo_height, pct_quality, filepath, filenamePrefix, logfile)
+    dropbox_upload(verbose, logfile, dropbox_app, dropbox_token, filename, dropbox_folder)
+    dropbox_cleanup(verbose,logfile,dropbox_app,dropbox_token,dropbox_folder, dropbox_keep_files)
+    os.remove(filename)
 
 elif verbose:
   datestr = get_date()

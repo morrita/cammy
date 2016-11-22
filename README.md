@@ -15,3 +15,5 @@ update-rc.d: using dependency based boot sequencing
 
 4) install Python libraries: 
 pip install dropbox
+
+5) sudo apt-get install -y gpac

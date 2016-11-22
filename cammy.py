@@ -67,7 +67,7 @@ def readConfigFile(cfg_file):
     global dropbox_app; dropbox_app= parser.get('DropboxSetup','dropbox_app') 
     global dropbox_enabled; dropbox_enabled= parser.getboolean('DropboxSetup','dropbox_enabled') 
     global dropbox_folder; dropbox_folder= parser.get('DropboxSetup','dropbox_folder') 
-    global dropbox_keep_files; dropbox_ keep_files= parser.getint('DropboxSetup','dropbox_keep_files') 
+    global dropbox_keep_files; dropbox_keep_files= parser.getint('DropboxSetup','dropbox_keep_files') 
 
 def sigint_handler(signum, frame):
     os.remove (running_flag) 

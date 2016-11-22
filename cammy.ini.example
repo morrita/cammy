@@ -46,3 +46,5 @@ dropbox_app             :app name
 dropbox_enabled         :1
 dropbox_folder		:/uploads/
 dropbox_keep_files	:3
+film_duration		:5
+enable_film		:1
