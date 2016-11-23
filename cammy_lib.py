@@ -68,18 +68,18 @@ def detect_motion(photo_width, photo_height,test_width, test_height, pct_quality
 
      return('')
 
-def saveFilm(photo_width, photo_height, filepath, filenamePrefix, logfile, film_duration):
+def saveFilm(film_width, film_height, filepath, logfile, film_duration):
 
     import subprocess
     import os
 
     datestr = get_date()
 
-    temp_filename = filepath + "/" + filenamePrefix + "_" + str(photo_width) + "x" + str(photo_height) + "_" + datestr + ".h264"
-    filename = filepath + "/" + filenamePrefix + "_" + str(photo_width) + "x" + str(photo_height) + "_" + datestr + ".mp4"
+    temp_filename = filepath + "/film_" + str(film_width) + "x" + str(film_height) + "_" + datestr + ".h264"
+    filename = filepath + "/film_" + str(film_width) + "x" + str(film_height) + "_" + datestr + ".mp4"
 
-    subprocess.call("raspivid -fps 30 -mm matrix -w %d -h %d -o %s -t %d" % (photo_width, photo_height, temp_filename, film_duration), shell=True)
-    subprocess.call("MP4Box -fps 30 -add %s %s" % (temp_filename,filename), shell=True) 
+    subprocess.call("raspivid -fps 30 -mm matrix -w %d -h %d -o %s -t %d" % (film_width, film_height, temp_filename, film_duration), shell=True)
+    subprocess.call("MP4Box -fps 30 -add %s %s > /dev/null 2>&1" % (temp_filename,filename), shell=True) 
     os.remove (temp_filename)
 
     update_file("INFO: Captured film %s at %s \n" % (filename,datestr), logfile)

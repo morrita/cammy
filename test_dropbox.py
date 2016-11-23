@@ -58,6 +58,8 @@ def readConfigFile():
     global tidy_list; tidy_list = parser.get('PathSetup','tidy_list')
     tidy_list = tidy_list.split(',')
 
+    global film_width; film_width = parser.getint('CameraSetup','film_width') 
+    global film_height; film_height = parser.getint('CameraSetup','film_height') 
     global photo_width; photo_width = parser.getint('CameraSetup','photo_width') 
     global photo_height; photo_height = parser.getint('CameraSetup','photo_height') 
     global pct_quality; pct_quality = parser.getint('CameraSetup','pct_quality') 
@@ -79,6 +81,7 @@ def readConfigFile():
     global dropbox_app; dropbox_app= parser.get('DropboxSetup','dropbox_app') 
     global dropbox_enabled; dropbox_enabled= parser.getboolean('DropboxSetup','dropbox_enabled') 
     global dropbox_folder; dropbox_folder= parser.get('DropboxSetup','dropbox_folder')
+    global dropbox_film_folder; dropbox_film_folder= parser.get('DropboxSetup','dropbox_film_folder')
     global dropbox_keep_files; dropbox_keep_files= parser.getint('DropboxSetup','dropbox_keep_files')
     global film_duration; film_duration= parser.getint('DropboxSetup','film_duration')
     global film_enable; film_enable= parser.getboolean('DropboxSetup','film_enable')
@@ -91,9 +94,9 @@ readConfigFile() # read all global variables from external configuration file
 if dropbox_enabled:
 
   if film_enable:
-    filename = saveFilm(photo_width, photo_height, filepath, filenamePrefix, logfile, film_duration)
-    dropbox_upload(verbose, logfile, dropbox_app, dropbox_token, filename, dropbox_folder)
-    dropbox_cleanup(verbose,logfile,dropbox_app,dropbox_token,dropbox_folder, dropbox_keep_files)
+    filename = saveFilm(film_width, film_height, filepath, logfile, film_duration)
+    dropbox_upload(verbose, logfile, dropbox_app, dropbox_token, filename, dropbox_film_folder)
+    dropbox_cleanup(verbose,logfile,dropbox_app,dropbox_token,dropbox_film_folder, dropbox_keep_files)
     os.remove(filename)
 
   else:
