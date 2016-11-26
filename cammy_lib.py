@@ -133,7 +133,9 @@ def sendEmail(emailTo,emailSubject, email_user, email_server, email_password, lo
           with open(filename,'rb') as f:
             img = MIMEImage(f.read(), name=os.path.basename(filename))
             msg.attach(img)
-
+        elif ('.mp4' in filename.lower()) : # this is a movie file alert
+            # do nothing
+            pass
         else:
           with open (filename, 'r') as f:
             attachment = MIMEText(f.read())

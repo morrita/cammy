@@ -8,6 +8,7 @@ from cammy_lib import dropbox_upload
 from cammy_lib import dropbox_cleanup
 from cammy_lib import saveImage 
 from cammy_lib import saveFilm
+from cammy_lib import sendEmail
 
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -97,6 +98,9 @@ if dropbox_enabled:
     filename = saveFilm(film_width, film_height, filepath, logfile, film_duration)
     dropbox_upload(verbose, logfile, dropbox_app, dropbox_token, filename, dropbox_film_folder)
     dropbox_cleanup(verbose,logfile,dropbox_app,dropbox_token,dropbox_film_folder, dropbox_keep_files)
+    emailSubject = "Motion detected! Movie file uploaded to Dropbox at "
+    first_line='Motion detected! Movie file uploaded to Dropbox: %s' % (os.path.basename(filename))
+    sendEmail(email_alert_user,emailSubject, email_user, email_server, email_password, logfile, filename,first_line)
     os.remove(filename)
 
   else:
