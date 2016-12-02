@@ -22,7 +22,7 @@ def captureTestImage(test_width, test_height):
     return im, buffer
 
 
-def detect_motion(photo_width, photo_height,test_width, test_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold, verbose):
+def detect_motion(film_enable, film_width, film_height, film_duration,photo_width, photo_height,test_width, test_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold, verbose):
 
      import os
      from datetime import datetime
@@ -51,8 +51,14 @@ def detect_motion(photo_width, photo_height,test_width, test_height, pct_quality
                  changedPixels += 1
 
                  if changedPixels > sensitivity:
-                      filename = saveImage(photo_width, photo_height, pct_quality, filepath, filenamePrefix, logfile)
+                      if film_enable:
+                          filename = saveFilm(film_width, film_height, filepath, logfile, film_duration)
+
+                      else:
+                          filename = saveImage(photo_width, photo_height, pct_quality, filepath, filenamePrefix, logfile)
+
                       return (filename) 
+
      t4 = datetime.now()
 
      if verbose:
