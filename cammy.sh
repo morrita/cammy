@@ -18,7 +18,7 @@ CAMMY_ERRORLOG="/var/log/cammy/cammy_errors.log"
 case "$1" in
 
 start)
-  CAMMY_PID=`ps -ef | grep cammy.py | grep -v grep | awk '{ print $2 }'`
+  CAMMY_PID=`ps -ef | grep cammy.py | grep -v cammy_errors.log | grep -v grep | awk '{ print $2 }'`
   if [ -n "$CAMMY_PID" ]
   then
     echo "CAMMY is already running (pid: $CAMMY_PID)"
@@ -31,7 +31,7 @@ start)
   ;;
 
 stop)
-  CAMMY_PID=`ps -ef | grep cammy.py | grep -v grep | awk '{ print $2 }'`
+  CAMMY_PID=`ps -ef | grep cammy.py | grep -v cammy_errors.log | grep -v grep | awk '{ print $2 }'`
   if [ -n "$CAMMY_PID" ]
   then
     # stop cammy 

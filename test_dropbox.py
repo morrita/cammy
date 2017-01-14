@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # name: cammy.py
 # version: 2.1 
 # date: May 2016

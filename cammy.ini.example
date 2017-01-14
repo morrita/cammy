@@ -15,12 +15,11 @@ email_polling   :60
 logdir 		:/var/log/sentry
 logfile 	:%(logdir)s/sentry.log
 tmpdir 		:/tmp
-tmpfile 	:%(tmpdir)s/sentry_counter.txt
 running_flag    :%(tmpdir)s/sentry_running.txt
 stopfile 	:%(tmpdir)s/sentry_stop_monitoring.txt
 filepath 	:/tmp
 filenamePrefix  :image 
-tidy_list       :%(running_flag)s,%(tmpfile)s
+tidy_list       :%(running_flag)s
 
 [CameraSetup]
 photo_width 	:640
@@ -32,6 +31,7 @@ test_width	:100
 test_height	:75
 film_width      :640
 film_height     :480
+camera_timeout  :2
 
 [GeneralSetup]
 use_acl 		:1

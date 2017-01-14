@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # name: cammy.py
 # version: 0.2 
 # date: November 2016
@@ -8,7 +8,7 @@ import sys
 import os
 import signal
 from datetime import datetime
-from ConfigParser import SafeConfigParser
+import configparser
 
 from cammy_lib import get_date
 from cammy_lib import update_file 
@@ -22,7 +22,7 @@ from cammy_lib import saveFilm
 
 def readConfigFile(cfg_file):
     # read variables from config file
-    parser = SafeConfigParser()
+    parser = configparser.ConfigParser()
     parser.read (cfg_file)
 
     global email_server; email_server = parser.get('EmailSetup', 'email_server')
@@ -39,7 +39,6 @@ def readConfigFile(cfg_file):
     global logdir; logdir = parser.get('PathSetup', 'logdir')
     global logfile; logfile = parser.get('PathSetup', 'logfile')
     global tmpdir; tmpdir = parser.get('PathSetup', 'tmpdir')
-    global tmpfile; tmpfile = parser.get('PathSetup', 'tmpfile')
     global running_flag; running_flag = parser.get('PathSetup', 'running_flag')
     global stopfile; stopfile = parser.get('PathSetup', 'stopfile')
     global filepath; filepath = parser.get('PathSetup', 'filepath')
@@ -56,6 +55,7 @@ def readConfigFile(cfg_file):
     global threshold; threshold = parser.getint('CameraSetup','threshold') 
     global test_width;test_width = parser.getint('CameraSetup','test_width') 
     global test_height; test_height = parser.getint('CameraSetup','test_height') 
+    global camera_timeout; camera_timeout = parser.getint('CameraSetup','camera_timeout') 
 
     global loopThreshold; loopThreshold = parser.getint('GeneralSetup','loopThreshold') 
     global max_second; max_second = parser.getint('GeneralSetup','max_second') 
@@ -128,13 +128,13 @@ while True:
         networks_okay = False 
         email_okay = False
         datestr = get_date()
-        update_file("ERROR: Network failure datected at %s\n" %  (datestr), logfile)
+        update_file("ERROR: Network failure detected at %s\n" %  (datestr), logfile)
 
     if (not os.path.isfile(stopfile)): # if monitoring has not bee instructed to stop
         n1 = datetime.now()
         while True:
 
-            filename = detect_motion(film_enable, film_width, film_height, film_duration,photo_width, photo_height,test_width, test_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold, verbose)
+            filename = detect_motion(film_enable, film_width, film_height, film_duration,photo_width, photo_height,test_width, test_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold, verbose, tidy_list, camera_timeout)
 
             if filename and networks_okay and email_okay:
                 if film_enable:

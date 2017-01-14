@@ -1,19 +1,37 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # name: sentry_lib.py
 # version: 0.3 
 # date: July 2016
 
 
-def captureTestImage(test_width, test_height):
+def captureTestImage(test_width, test_height, logfile, tidy_list,  camera_timeout):
 
     import subprocess
-    import StringIO
+    import time
+    from io import BytesIO 
     from PIL import Image
  
+    camera_timeout = 2.0 
+    sleeptime = 300
 
     command = "raspistill -w %s -h %s -t 1 -e bmp -o -" % (test_width, test_height)
-    imageData = StringIO.StringIO()
-    imageData.write(subprocess.check_output(command, shell=True))
+    imageData = BytesIO()
+
+    try:
+        imageData.write(subprocess.check_output(command,timeout=camera_timeout,shell=True))
+
+    except subprocess.TimeoutExpired:
+         datestr = get_date()
+         message = "ERROR: test image capture ran for longer than timeout " + str(camera_timeout) + " at " + datestr  + "\n"
+         update_file (message, logfile)
+
+         update_file("INFO: Now sleeping for %s seconds at %s \n" % (str(sleeptime), datestr), logfile)
+         time.sleep(sleeptime)
+
+         update_file("INFO: Now rebooting at %s \n" % (datestr), logfile)
+         tidy_flagfiles(tidy_list, logfile)
+         system_shutdown(logfile,restart=True)
+
     imageData.seek(0)
     im = Image.open(imageData)
     buffer = im.load()
@@ -22,7 +40,7 @@ def captureTestImage(test_width, test_height):
     return im, buffer
 
 
-def detect_motion(film_enable, film_width, film_height, film_duration,photo_width, photo_height,test_width, test_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold, verbose):
+def detect_motion(film_enable, film_width, film_height, film_duration,photo_width, photo_height,test_width, test_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold, verbose, tidy_list, camera_timeout):
 
      import os
      from datetime import datetime
@@ -34,17 +52,17 @@ def detect_motion(film_enable, film_width, film_height, film_duration,photo_widt
 
      t1 = datetime.now()
      # Get first image
-     image1, buffer1 = captureTestImage(test_width, test_height)
+     image1, buffer1 = captureTestImage(test_width, test_height, logfile, tidy_list, camera_timeout)
 
      t2 = datetime.now()
      # Get comparison image
-     image2, buffer2 = captureTestImage(test_width, test_height)
+     image2, buffer2 = captureTestImage(test_width, test_height, logfile, tidy_list, camera_timeout)
 
      t3 = datetime.now()
      changedPixels = 0
-     for x in xrange(0, test_width):
+     for x in range(0, test_width):
          # Scan one line of image then check sensitivity for movement
-         for y in xrange(0, test_height):
+         for y in range(0, test_height):
              # Check green as it's the highest quality channel
              pixdiff = abs(buffer1[x, y][1] - buffer2[x, y][1])
              if pixdiff > threshold:
@@ -174,7 +192,7 @@ def accessPermitted(senderAddress, acl, use_acl):  # return true if senderAddres
 def getEmailInfo(response_part):
 
     import email
-    msg = email.message_from_string(response_part[1])
+    msg = email.message_from_bytes(response_part[1])
     varSubject = msg['subject']
     varFrom = msg['from']
 
