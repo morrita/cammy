@@ -31,7 +31,7 @@ test_width	:100
 test_height	:75
 film_width      :640
 film_height     :480
-camera_timeout  :2
+camera_timeout  :1.5
 
 [GeneralSetup]
 use_acl 		:1

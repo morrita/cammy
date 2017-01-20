@@ -4,18 +4,22 @@
 # date: July 2016
 
 
-def captureTestImage(test_width, test_height, logfile, tidy_list,  camera_timeout):
+def captureTestImage(test_width, test_height, logfile, tidy_list,  camera_timeout, verbose):
 
     import subprocess
     import time
     from io import BytesIO 
     from PIL import Image
  
-    camera_timeout = 2.0 
     sleeptime = 300
 
     command = "raspistill -w %s -h %s -t 1 -e bmp -o -" % (test_width, test_height)
     imageData = BytesIO()
+
+    if verbose:
+        datestr = get_date()
+        message = "INFO: now taking sample image by executing command " + command + " camera_timeout = " + str(camera_timeout) + " at " + datestr  + "\n"
+        update_file (message, logfile)
 
     try:
         imageData.write(subprocess.check_output(command,timeout=camera_timeout,shell=True))
@@ -25,12 +29,40 @@ def captureTestImage(test_width, test_height, logfile, tidy_list,  camera_timeou
          message = "ERROR: test image capture ran for longer than timeout " + str(camera_timeout) + " at " + datestr  + "\n"
          update_file (message, logfile)
 
-         update_file("INFO: Now sleeping for %s seconds at %s \n" % (str(sleeptime), datestr), logfile)
+         update_file("INFO: Now sleeping for %s seconds before rebooting at %s \n" % (str(sleeptime), datestr), logfile)
          time.sleep(sleeptime)
 
          update_file("INFO: Now rebooting at %s \n" % (datestr), logfile)
          tidy_flagfiles(tidy_list, logfile)
          system_shutdown(logfile,restart=True)
+
+    except subprocess.CalledProcessError:
+         datestr = get_date()
+         message = "ERROR: test image capture returned a non-zero exit status at " + datestr  + "\n"
+         update_file (message, logfile)
+
+         update_file("INFO: Now sleeping for %s seconds before rebooting at %s \n" % (str(sleeptime), datestr), logfile)
+         time.sleep(sleeptime)
+
+         update_file("INFO: Now rebooting at %s \n" % (datestr), logfile)
+         tidy_flagfiles(tidy_list, logfile)
+         system_shutdown(logfile,restart=True)
+
+    except:
+         datestr = get_date()
+         message = "ERROR: test image capture returned an un-caught error at " + datestr  + "\n"
+         update_file (message, logfile)
+
+         update_file("INFO: Now sleeping for %s seconds before rebooting at %s \n" % (str(sleeptime), datestr), logfile)
+         time.sleep(sleeptime)
+
+         update_file("INFO: Now rebooting at %s \n" % (datestr), logfile)
+         tidy_flagfiles(tidy_list, logfile)
+
+    if verbose:
+        datestr = get_date()
+        message = "INFO: sample image captured OK at " + datestr  + "\n"
+        update_file (message, logfile)
 
     imageData.seek(0)
     im = Image.open(imageData)
@@ -52,11 +84,11 @@ def detect_motion(film_enable, film_width, film_height, film_duration,photo_widt
 
      t1 = datetime.now()
      # Get first image
-     image1, buffer1 = captureTestImage(test_width, test_height, logfile, tidy_list, camera_timeout)
+     image1, buffer1 = captureTestImage(test_width, test_height, logfile, tidy_list, camera_timeout, verbose)
 
      t2 = datetime.now()
      # Get comparison image
-     image2, buffer2 = captureTestImage(test_width, test_height, logfile, tidy_list, camera_timeout)
+     image2, buffer2 = captureTestImage(test_width, test_height, logfile, tidy_list, camera_timeout, verbose)
 
      t3 = datetime.now()
      changedPixels = 0

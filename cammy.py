@@ -55,7 +55,7 @@ def readConfigFile(cfg_file):
     global threshold; threshold = parser.getint('CameraSetup','threshold') 
     global test_width;test_width = parser.getint('CameraSetup','test_width') 
     global test_height; test_height = parser.getint('CameraSetup','test_height') 
-    global camera_timeout; camera_timeout = parser.getint('CameraSetup','camera_timeout') 
+    global camera_timeout; camera_timeout = parser.getfloat('CameraSetup','camera_timeout') 
 
     global loopThreshold; loopThreshold = parser.getint('GeneralSetup','loopThreshold') 
     global max_second; max_second = parser.getint('GeneralSetup','max_second') 
