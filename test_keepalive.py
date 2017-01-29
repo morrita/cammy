@@ -40,17 +40,30 @@ prog_name = sys.argv[0]
 
 readConfigFile(cfg_file) # read all global variables from external configuration file
 
-if verbose: 
-    datestr = get_date()
-    update_file("INFO: program %s started in verbose mode at %s \n" % (prog_name,datestr), keepalive_file)
-
-access_type = "request"
-access_keepalive (verbose,keepalive_file, access_type)
+keepalive_threshold = 5
 
 access_type = "respond"
 access_keepalive (verbose,keepalive_file, access_type)
 
 
-access_type = "fail"
-access_keepalive (verbose,keepalive_file, access_type)
+access_type = "request"
+access_keepalive (verbose,keepalive_file, access_type, keepalive_threshold)
+
+access_type = "request"
+access_keepalive (verbose,keepalive_file, access_type, keepalive_threshold)
+
+access_type = "request"
+access_keepalive (verbose,keepalive_file, access_type, keepalive_threshold)
+
+access_type = "request"
+access_keepalive (verbose,keepalive_file, access_type, keepalive_threshold)
+
+access_type = "request"
+access_keepalive (verbose,keepalive_file, access_type, keepalive_threshold)
+
+access_type = "request"
+access_keepalive (verbose,keepalive_file, access_type, keepalive_threshold)
+
+access_type = "request"
+access_keepalive (verbose,keepalive_file, access_type, keepalive_threshold)
 

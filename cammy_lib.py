@@ -514,21 +514,49 @@ def dropbox_cleanup(verbose,logfile,appname,token,dropbox_folder,dropbox_keep_fi
       counter += 1
 
 
+def access_keepalive(verbose,keepalive_file,keepalive_action,keepalive_threshold=0):
 
-
-def access_keepalive(verbose,keepalive_file,keepalive_action):
-
+    import os
+    
     if keepalive_action == 'request':
-        print ('keepalive_action = request')
+        print ('keepalive_action = request invoked')
+
+
+        if os.path.isfile(keepalive_file):
+
+            with open(keepalive_file, 'r') as f:
+                lineList = f.readlines()
+                lastLine = lineList[len(lineList)-1]
+                lastList = lastLine.split(":")
+                lastAction = lastList[0]
+                lastActionType = lastList[1]
+                lastActionSeq = lastList[2]
+                seq = int(lastActionSeq) + 1
+
+                print ("lastLine = %s" % lastLine)
+                print ("lastAction = %s" %lastAction)
+                print ("lastActionType = %s" %lastActionType)
+                print ("lastActionSeq = %s" %lastActionSeq)
+                print ("seq = %d" %seq)
+
+
+                if seq > keepalive_threshold:
+                   print ("keepalive threshold %s breached!" % str(keepalive_threshold)) 
+
+        else:
+            seq = 0
+
+        datestr = get_date()
+        message = "ACTION:request:" + str(seq) + ":"  + datestr  + "\n"
+        update_file (message, keepalive_file)
 
     elif keepalive_action == 'respond':
-        print ('keepalive_action = respond')
+        print ('keepalive_action = respond invoked')
+
+        datestr = get_date()
+        message = "ACTION:respond:0:" + datestr  + "\n"
+        update_file (message, keepalive_file)
 
     else:
-        print ('keepalive_action not recognised')
-
-    if verbose:
-        datestr = get_date()
-        message = "INFO: keepalive_action <" + keepalive_action + "> for filename " + keepalive_file +  " received at " + datestr  + "\n"
-        update_file (message, keepalive_file)
+        pass
 
