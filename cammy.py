@@ -42,6 +42,7 @@ def readConfigFile(cfg_file):
     global running_flag; running_flag = parser.get('PathSetup', 'running_flag')
     global stopfile; stopfile = parser.get('PathSetup', 'stopfile')
     global filepath; filepath = parser.get('PathSetup', 'filepath')
+    global keepalive_file; keepalive_file = parser.get('PathSetup', 'keepalive_file')
     global filenamePrefix; filenamePrefix = parser.get('PathSetup', 'filenamePrefix')
     global tidy_list; tidy_list = parser.get('PathSetup','tidy_list')
     tidy_list = tidy_list.split(',')
