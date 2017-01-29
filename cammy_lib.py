@@ -512,3 +512,23 @@ def dropbox_cleanup(verbose,logfile,appname,token,dropbox_folder,dropbox_keep_fi
           dbx.files_delete(delfile)
    
       counter += 1
+
+
+
+
+def access_keepalive(verbose,keepalive_file,keepalive_action):
+
+    if keepalive_action == 'request':
+        print ('keepalive_action = request')
+
+    elif keepalive_action == 'respond':
+        print ('keepalive_action = respond')
+
+    else:
+        print ('keepalive_action not recognised')
+
+    if verbose:
+        datestr = get_date()
+        message = "INFO: keepalive_action <" + keepalive_action + "> for filename " + keepalive_file +  " received at " + datestr  + "\n"
+        update_file (message, keepalive_file)
+
