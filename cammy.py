@@ -19,6 +19,7 @@ from cammy_lib import detect_motion
 from cammy_lib import dropbox_upload 
 from cammy_lib import dropbox_cleanup
 from cammy_lib import saveFilm
+from cammy_lib import access_keepalive
 
 def readConfigFile(cfg_file):
     # read variables from config file
@@ -43,6 +44,7 @@ def readConfigFile(cfg_file):
     global stopfile; stopfile = parser.get('PathSetup', 'stopfile')
     global filepath; filepath = parser.get('PathSetup', 'filepath')
     global keepalive_file; keepalive_file = parser.get('PathSetup', 'keepalive_file')
+    global keepalive_threshold; keepalive_threshold = parser.getint('PathSetup', 'keepalive_threshold')
     global filenamePrefix; filenamePrefix = parser.get('PathSetup', 'filenamePrefix')
     global tidy_list; tidy_list = parser.get('PathSetup','tidy_list')
     tidy_list = tidy_list.split(',')
@@ -93,6 +95,8 @@ cfg_file = '/usr/local/bin/cammy/cammy.ini'
 
 readConfigFile(cfg_file) # read all global variables from external configuration file
 
+keepalive_threshold = 5
+
 signal.signal(signal.SIGINT, sigint_handler)
 signal.signal(signal.SIGHUP, sighup_handler)
 
@@ -114,8 +118,12 @@ while True:
         networks_okay = True
         datestr = get_date()
         update_file("INFO: Network checks all OK at %s\n" % (datestr), logfile)
+
+
+        access_type = "respond"
+        access_keepalive (verbose,keepalive_file, access_type, tidy_list, logfile, keepalive_threshold)
          
-        email_okay = processEmail(email_server, email_user, email_password, logfile, acl, use_acl, emailSubject, verbose, stopfile, tidy_list, photo_width, photo_height, pct_quality, filepath, filenamePrefix)
+        email_okay = processEmail(email_server, email_user, email_password, logfile, keepalive_file, acl, use_acl, emailSubject, verbose, stopfile, tidy_list, photo_width, photo_height, pct_quality, filepath, filenamePrefix)
 
         if verbose:
             datestr = get_date()

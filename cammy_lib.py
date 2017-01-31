@@ -241,7 +241,7 @@ def getEmailInfo(response_part):
 
     return (senderAddress, varSubject)
 
-def processEmail(email_server, email_user, email_password, logfile, acl, use_acl, emailSubject, verbose, stopfile, tidy_list, photo_width, photo_height, pct_quality, filepath, filenamePrefix):
+def processEmail(email_server, email_user, email_password, logfile, keepalive_file, acl, use_acl, emailSubject, verbose, stopfile, tidy_list, photo_width, photo_height, pct_quality, filepath, filenamePrefix):
 
     import smtplib
     import imaplib
@@ -313,9 +313,12 @@ cammy:help \t\t will email this message back!"
 
                         elif 'cammy:resetlogs' in varSubject.lower(): # logfile reset requested
                             os.remove (logfile)
+                            os.remove (keepalive_file)
                             datestr = get_date()
                             update_file("INFO: A logfile reset was requested by %s at %s \n" % (senderAddress, datestr), logfile)
                             sendEmail (senderAddress, emailSubject, email_user, email_server, email_password, logfile, logfile,"The logfile has been reset, here is the new logfile contents:\n")
+
+
                         elif 'cammy:shutdown' in varSubject.lower(): # shutdown requested
                             datestr = get_date()
                             update_file("INFO: A shutdown was requested by %s at %s \n" % (senderAddress, datestr), logfile)
@@ -514,34 +517,30 @@ def dropbox_cleanup(verbose,logfile,appname,token,dropbox_folder,dropbox_keep_fi
       counter += 1
 
 
-def access_keepalive(verbose,keepalive_file,keepalive_action,keepalive_threshold=0):
+def access_keepalive(verbose,keepalive_file,keepalive_action,tidy_list, logfile, keepalive_threshold=0):
 
     import os
     
     if keepalive_action == 'request':
-        print ('keepalive_action = request invoked')
-
 
         if os.path.isfile(keepalive_file):
 
             with open(keepalive_file, 'r') as f:
                 lineList = f.readlines()
-                lastLine = lineList[len(lineList)-1]
-                lastList = lastLine.split(":")
-                lastAction = lastList[0]
-                lastActionType = lastList[1]
-                lastActionSeq = lastList[2]
-                seq = int(lastActionSeq) + 1
+                if len(lineList) > 0:
+                    lastLine = lineList[len(lineList)-1]
+                    lastList = lastLine.split(":")
+                    lastAction = lastList[0]
+                    lastActionType = lastList[1]
+                    lastActionSeq = lastList[2]
+                    seq = int(lastActionSeq) + 1
 
-                print ("lastLine = %s" % lastLine)
-                print ("lastAction = %s" %lastAction)
-                print ("lastActionType = %s" %lastActionType)
-                print ("lastActionSeq = %s" %lastActionSeq)
-                print ("seq = %d" %seq)
+                    if seq > keepalive_threshold:
+                       tidy_flagfiles(tidy_list, logfile)
+                       system_shutdown(logfile,restart=True)
 
-
-                if seq > keepalive_threshold:
-                   print ("keepalive threshold %s breached!" % str(keepalive_threshold)) 
+                else:
+                       seq = 0
 
         else:
             seq = 0
@@ -551,7 +550,6 @@ def access_keepalive(verbose,keepalive_file,keepalive_action,keepalive_threshold
         update_file (message, keepalive_file)
 
     elif keepalive_action == 'respond':
-        print ('keepalive_action = respond invoked')
 
         datestr = get_date()
         message = "ACTION:respond:0:" + datestr  + "\n"
