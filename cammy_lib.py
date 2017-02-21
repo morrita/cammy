@@ -447,6 +447,31 @@ def system_shutdown(logfile,restart):
     output = process.communicate()[0]
 
 
+def dropbox_create_shared_link(verbose,logfile,appname,token,uploadfile,dropbox_folder):
+    
+  if verbose:
+    message = "INFO: using appname = " + appname + " to create shared Dropbox link\n"
+    update_file (message, logfile)
+
+  import dropbox
+  import os.path
+  from dropbox.exceptions import ApiError, AuthError
+  from dropbox.files import WriteMode
+
+  dbx = dropbox.Dropbox(token)
+
+  filename = dropbox_folder + os.path.basename(uploadfile)
+  shared_link_metadata = dbx.sharing_create_shared_link_with_settings(filename)
+
+  message = "INFO: shared link URL = " + shared_link_metadata.url + " on Dropbox link\n"
+  update_file (message, logfile)
+
+  return (shared_link_metadata.url)
+
+
+
+
+
 def dropbox_upload(verbose,logfile,appname,token,uploadfile,dropbox_folder):
     
   if verbose:

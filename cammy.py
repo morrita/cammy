@@ -18,6 +18,7 @@ from cammy_lib import sendEmail
 from cammy_lib import detect_motion 
 from cammy_lib import dropbox_upload 
 from cammy_lib import dropbox_cleanup
+from cammy_lib import dropbox_create_shared_link 
 from cammy_lib import saveFilm
 from cammy_lib import access_keepalive
 
@@ -95,7 +96,7 @@ cfg_file = '/usr/local/bin/cammy/cammy.ini'
 
 readConfigFile(cfg_file) # read all global variables from external configuration file
 
-keepalive_threshold = 5
+#keepalive_threshold = 5
 
 signal.signal(signal.SIGINT, sigint_handler)
 signal.signal(signal.SIGHUP, sighup_handler)
@@ -146,9 +147,15 @@ while True:
             filename = detect_motion(film_enable, film_width, film_height, film_duration,photo_width, photo_height,test_width, test_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold, verbose, tidy_list, camera_timeout)
 
             if filename and networks_okay and email_okay:
+
+                if dropbox_enabled:
+                    dropbox_upload(verbose, logfile, dropbox_app, dropbox_token, filename, dropbox_folder)
+                    dropbox_url = dropbox_create_shared_link(verbose, logfile, dropbox_app, dropbox_token, filename, dropbox_folder)
+                    dropbox_cleanup(verbose,logfile,dropbox_app,dropbox_token,dropbox_folder, dropbox_keep_files)
+
                 if film_enable:
                     emailSubject = "Motion detected! Movie file uploaded to Dropbox at "
-                    first_line='Motion detected! Movie file uploaded to Dropbox: %s' % (os.path.basename(filename))
+                    first_line='Motion detected! Movie file uploaded to Dropbox: %s URL:%s' % (os.path.basename(filename),dropbox_url)
                     sendEmail(email_alert_user,emailSubject, email_user, email_server, email_password, logfile, filename,first_line)
                     datestr = get_date()
                     update_file("INFO: Motion detected! Film recorded - notification of file %s emailed to %s at %s\n" % (filename, email_alert_user, datestr), logfile)
@@ -159,10 +166,6 @@ while True:
                     datestr = get_date()
                     update_file("INFO: Motion detected! File %s emailed to %s at %s\n" % (filename, email_alert_user, datestr), logfile)
 
-                if dropbox_enabled:
-                    dropbox_upload(verbose, logfile, dropbox_app, dropbox_token, filename, dropbox_folder)
-                    dropbox_cleanup(verbose,logfile,dropbox_app,dropbox_token,dropbox_folder, dropbox_keep_files) 
-
                 os.remove(filename)
 
             n2 = datetime.now()
@@ -170,7 +173,7 @@ while True:
             if elapsed_time > email_polling:
                 break
     else:
-        time.sleep (10)
+        time.sleep (30)
         if verbose:
             datestr = get_date()
             update_file("INFO: Stop flag %s detected at %s hence aborting\n" % (stopfile, datestr), logfile)
