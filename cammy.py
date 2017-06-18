@@ -96,8 +96,6 @@ cfg_file = '/usr/local/bin/cammy/cammy.ini'
 
 readConfigFile(cfg_file) # read all global variables from external configuration file
 
-#keepalive_threshold = 5
-
 signal.signal(signal.SIGINT, sigint_handler)
 signal.signal(signal.SIGHUP, sighup_handler)
 
@@ -119,7 +117,6 @@ while True:
         networks_okay = True
         datestr = get_date()
         update_file("INFO: Network checks all OK at %s\n" % (datestr), logfile)
-
 
         access_type = "respond"
         access_keepalive (verbose,keepalive_file, access_type, tidy_list, logfile, keepalive_threshold)
@@ -148,14 +145,14 @@ while True:
 
             if filename and networks_okay and email_okay:
 
-                if dropbox_enabled:
+                if dropbox_enabled and film_enable:
                     dropbox_upload(verbose, logfile, dropbox_app, dropbox_token, filename, dropbox_folder)
                     dropbox_url = dropbox_create_shared_link(verbose, logfile, dropbox_app, dropbox_token, filename, dropbox_folder)
                     dropbox_cleanup(verbose,logfile,dropbox_app,dropbox_token,dropbox_folder, dropbox_keep_files)
 
-                if film_enable:
-                    emailSubject = "Motion detected! Movie file uploaded to Dropbox at "
-                    first_line='Motion detected! Movie file uploaded to Dropbox: %s URL:%s' % (os.path.basename(filename),dropbox_url)
+                    emailSubject = "Motion detected! Movie file uploaded to Dropbox"
+                    #first_line='Motion detected! Movie file uploaded to Dropbox: %s URL:%s' % (os.path.basename(filename),dropbox_url)
+                    first_line="Motion detected! Movie file uploaded to <html><body> <a href='%s'>Dropbox</a></body></html>" % (dropbox_url)
                     sendEmail(email_alert_user,emailSubject, email_user, email_server, email_password, logfile, filename,first_line)
                     datestr = get_date()
                     update_file("INFO: Motion detected! Film recorded - notification of file %s emailed to %s at %s\n" % (filename, email_alert_user, datestr), logfile)
