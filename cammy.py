@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # name: cammy.py
-# version: 0.2 
-# date: November 2016
+# version: 0.3 
+# date: March 2018 
 
 import time
 import sys
@@ -26,6 +26,8 @@ def readConfigFile(cfg_file):
     # read variables from config file
     parser = configparser.ConfigParser()
     parser.read (cfg_file)
+
+
 
     global email_server; email_server = parser.get('EmailSetup', 'email_server')
     global email_user; email_user = parser.get('EmailSetup', 'email_user')
@@ -79,6 +81,18 @@ def readConfigFile(cfg_file):
     global film_enable; film_enable= parser.getboolean('DropboxSetup','film_enable')
     global dropbox_film_folder; dropbox_film_folder= parser.get('DropboxSetup','dropbox_film_folder')
 
+    if debug_mode:
+        update_file ("*********************************************************\n", logfile)
+        update_file ("Content listing of file: %s\n" % (cfg_file), logfile)
+        update_file ("*********************************************************", logfile)
+        update_file ("\n", logfile)
+        for section_name in parser.sections():
+            update_file ("Section: %s\n" % (section_name), logfile)
+            update_file ("  Options: %s\n" % (parser.options(section_name)), logfile)
+            for name, value in parser.items(section_name):
+                update_file ("  %s = %s\n" % (name, value), logfile)
+            update_file ("\n", logfile)
+
 def sigint_handler(signum, frame):
     os.remove (running_flag) 
     datestr = get_date()
@@ -92,12 +106,26 @@ def sighup_handler(signum, frame):
     update_file("INFO: program received a HUP signal at %s \n" % (datestr), logfile)
     sys.exit("Now exiting because an HUP signal was received")
 
+#debug_mode = True 
+debug_mode = False 
 cfg_file = '/usr/local/bin/cammy/cammy.ini'
+camera_busy_flag = '/tmp/CAMERA_BUSY.txt'
 
 readConfigFile(cfg_file) # read all global variables from external configuration file
 
 signal.signal(signal.SIGINT, sigint_handler)
 signal.signal(signal.SIGHUP, sighup_handler)
+
+if debug_mode:
+    # print all global variables
+    update_file ("***********************************************\n", logfile)
+    update_file ("Listing of file all glogal variables declared\n", logfile)
+    update_file ("***********************************************\n", logfile)
+    update_file ("\n", logfile)
+    vardict = globals()
+    for key,val in list(vardict.items()):
+        if (key != 'vardict') and (not key.startswith('__')):
+            update_file ("%s => %s\n" % (key, val), logfile)
 
 if verbose: 
     datestr = get_date()
@@ -141,7 +169,7 @@ while True:
         n1 = datetime.now()
         while True:
 
-            filename = detect_motion(film_enable, film_width, film_height, film_duration,photo_width, photo_height,test_width, test_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold, verbose, tidy_list, camera_timeout)
+            filename = detect_motion(film_enable, film_width, film_height, film_duration,photo_width, photo_height,test_width, test_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold, verbose, tidy_list, camera_timeout, camera_busy_flag)
 
             if filename and networks_okay and email_okay:
 

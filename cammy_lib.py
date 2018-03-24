@@ -72,9 +72,10 @@ def captureTestImage(test_width, test_height, logfile, tidy_list,  camera_timeou
     return im, buffer
 
 
-def detect_motion(film_enable, film_width, film_height, film_duration,photo_width, photo_height,test_width, test_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold, verbose, tidy_list, camera_timeout):
+def detect_motion(film_enable, film_width, film_height, film_duration,photo_width, photo_height,test_width, test_height, pct_quality, filepath, filenamePrefix, logfile, email_alert_user, sensitivity, threshold, verbose, tidy_list, camera_timeout, camera_busy_flag):
 
      import os
+     import time
      from datetime import datetime
 
      if verbose:
@@ -82,32 +83,48 @@ def detect_motion(film_enable, film_width, film_height, film_duration,photo_widt
          message = "INFO: now executing motion detection routine at " + datestr  + "\n"
          update_file (message, logfile)
 
-     t1 = datetime.now()
-     # Get first image
-     image1, buffer1 = captureTestImage(test_width, test_height, logfile, tidy_list, camera_timeout, verbose)
+     if os.path.isfile(camera_busy_flag):
+         datestr = get_date()
+         message = "INFO: camera_busy_flag detected at " + datestr  + "\n"
+         update_file (message, logfile)
+         time.sleep(2)
 
-     t2 = datetime.now()
-     # Get comparison image
-     image2, buffer2 = captureTestImage(test_width, test_height, logfile, tidy_list, camera_timeout, verbose)
+     else:
+         t1 = datetime.now()
+         # Get first image
+         image1, buffer1 = captureTestImage(test_width, test_height, logfile, tidy_list, camera_timeout, verbose)
 
-     t3 = datetime.now()
-     changedPixels = 0
-     for x in range(0, test_width):
-         # Scan one line of image then check sensitivity for movement
-         for y in range(0, test_height):
-             # Check green as it's the highest quality channel
-             pixdiff = abs(buffer1[x, y][1] - buffer2[x, y][1])
-             if pixdiff > threshold:
-                 changedPixels += 1
 
-                 if changedPixels > sensitivity:
-                      if film_enable:
-                          filename = saveFilm(film_width, film_height, filepath, logfile, film_duration)
+         t2 = datetime.now()
+         # Get comparison image
+         image2, buffer2 = captureTestImage(test_width, test_height, logfile, tidy_list, camera_timeout, verbose)
 
-                      else:
-                          filename = saveImage(photo_width, photo_height, pct_quality, filepath, filenamePrefix, logfile)
+         t3 = datetime.now()
+         changedPixels = 0
+         for x in range(0, test_width):
+             # Scan one line of image then check sensitivity for movement
+             for y in range(0, test_height):
+                 # Check green as it's the highest quality channel
+                 pixdiff = abs(buffer1[x, y][1] - buffer2[x, y][1])
+                 if pixdiff > threshold:
+                     changedPixels += 1
 
-                      return (filename) 
+                     if changedPixels > sensitivity:
+
+                         if os.path.isfile(camera_busy_flag): 
+                               datestr = get_date()
+                               message = "INFO: camera_busy_flag detected at " + datestr  + "\n"
+                               update_file (message, logfile)
+                               time.sleep(2)
+
+                         else:
+                             if film_enable:
+                                 filename = saveFilm(film_width, film_height, filepath, logfile, film_duration)
+
+                             else:
+                                 filename = saveImage(photo_width, photo_height, pct_quality, filepath, filenamePrefix, logfile)
+
+                             return (filename) 
 
      t4 = datetime.now()
 
@@ -627,6 +644,3 @@ def logging_decorator (trace_level,log_file):
             return r
         return wrapped
     return real_decorator
-
-
-
