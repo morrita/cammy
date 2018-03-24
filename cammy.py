@@ -60,6 +60,7 @@ def readConfigFile(cfg_file):
     global test_width;test_width = parser.getint('CameraSetup','test_width') 
     global test_height; test_height = parser.getint('CameraSetup','test_height') 
     global camera_timeout; camera_timeout = parser.getfloat('CameraSetup','camera_timeout') 
+    global camera_busy_flag; camera_busy_flag = parser.get('CameraSetup', 'camera_busy_flag')
 
     global loopThreshold; loopThreshold = parser.getint('GeneralSetup','loopThreshold') 
     global max_second; max_second = parser.getint('GeneralSetup','max_second') 
@@ -107,7 +108,6 @@ def sighup_handler(signum, frame):
 #debug_mode = True 
 debug_mode = False 
 cfg_file = '/usr/local/bin/cammy/cammy.ini'
-camera_busy_flag = '/tmp/CAMERA_BUSY.txt'
 
 readConfigFile(cfg_file) # read all global variables from external configuration file
 
