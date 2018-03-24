@@ -27,8 +27,6 @@ def readConfigFile(cfg_file):
     parser = configparser.ConfigParser()
     parser.read (cfg_file)
 
-
-
     global email_server; email_server = parser.get('EmailSetup', 'email_server')
     global email_user; email_user = parser.get('EmailSetup', 'email_user')
     global email_alert_user; email_alert_user = parser.get('EmailSetup', 'email_alert_user')
@@ -84,7 +82,7 @@ def readConfigFile(cfg_file):
     if debug_mode:
         update_file ("*********************************************************\n", logfile)
         update_file ("Content listing of file: %s\n" % (cfg_file), logfile)
-        update_file ("*********************************************************", logfile)
+        update_file ("*********************************************************\n", logfile)
         update_file ("\n", logfile)
         for section_name in parser.sections():
             update_file ("Section: %s\n" % (section_name), logfile)
@@ -179,7 +177,6 @@ while True:
                     dropbox_cleanup(verbose,logfile,dropbox_app,dropbox_token,dropbox_folder, dropbox_keep_files)
 
                     emailSubject = "Motion detected! Movie file uploaded to Dropbox"
-                    #first_line='Motion detected! Movie file uploaded to Dropbox: %s URL:%s' % (os.path.basename(filename),dropbox_url)
                     first_line="Motion detected! Movie file uploaded to <html><body> <a href='%s'>Dropbox</a></body></html>" % (dropbox_url)
                     sendEmail(email_alert_user,emailSubject, email_user, email_server, email_password, logfile, filename,first_line)
                     datestr = get_date()
