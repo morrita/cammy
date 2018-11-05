@@ -1,4 +1,4 @@
-Cammy, is a Python project aimed at using a respberry pi as a security camera by providing email alerts and integration with Dropbox.
+Cammy, is a Python project aimed at using a Raspberry pi as a security camera by providing email alerts and integration with Dropbox.
 
 Installation Instructions:
 
