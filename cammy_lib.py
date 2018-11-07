@@ -492,7 +492,7 @@ def dropbox_create_shared_link(verbose,logfile,appname,token,uploadfile,dropbox_
       return (shared_link_metadata.url)
 
   except ApiError as err:
-      message = "ERROR: an error ocurred attemping to create a shared link on dropbox\n"
+      message = "ERROR: an error ocurred attempting to create a shared link on dropbox\n"
       update_file (message, logfile)
       return("Dropbox ERROR")
 
@@ -525,7 +525,7 @@ def dropbox_upload(verbose,logfile,appname,token,uploadfile,dropbox_folder):
             update_file (message, logfile)
 
         except ApiError as err:
-            message = "ERROR: an error ocurred attemping to upload file to dropbox\n"
+            message = "ERROR: an error ocurred attempting to upload file to dropbox\n"
             update_file (message, logfile)
 
     else:

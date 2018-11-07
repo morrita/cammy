@@ -1,38 +1,40 @@
 # mailer.ini
-# contains global variables used by sentry.py
+# contains global variables used by cammy.py
 
 [EmailSetup]
-email_server 	:mail.ispnetwork.com
-email_user 	:my_rpi@ispnetwork.com
-email_alert_user:alert.username@ispnetwork.com
-email_password 	:my_email_password
+email_server 	:mail.myisp.com
+email_user 	:freds_rpi@myisp.com
+email_alert_user:freds_rpi@myisp.com
+email_password 	:raspberry123
 emailSubject 	:response from Raspberry Pi at 
 internet_gw 	:192.168.1.254
 nw_checks 	:%(internet_gw)s,%(email_server)s
-email_polling   :60
+email_polling   :30
 
 [PathSetup]
-logdir 		:/var/log/sentry
-logfile 	:%(logdir)s/sentry.log
+logdir 		:/var/log/cammy
+logfile 	:%(logdir)s/cammy.log
 tmpdir 		:/tmp
-running_flag    :%(tmpdir)s/sentry_running.txt
-stopfile 	:%(tmpdir)s/sentry_stop_monitoring.txt
+running_flag    :%(tmpdir)s/cammy_running.txt
+stopfile 	:%(tmpdir)s/cammy_stop_monitoring.txt
 filepath 	:/tmp
 filenamePrefix  :image 
 tidy_list       :%(running_flag)s
 keepalive_file	:%(tmpdir)s/cammy_keepalive.txt
+keepalive_threshold	:5
 
 [CameraSetup]
 photo_width 	:640
 photo_height 	:480
 pct_quality 	:100
-sensitivity	:30
-threshold	:150
+sensitivity	:15
+threshold	:80
 test_width	:100
 test_height	:75
 film_width      :640
 film_height     :480
 camera_timeout  :1.5
+camera_busy_flag:/tmp/camera_busy.txt
 
 [GeneralSetup]
 use_acl 		:1
@@ -41,14 +43,14 @@ loopThreshold 		:60
 max_running_flag	:3
 max_second		:55
 testcount		:0
-acl		:fred_bloggs@ispnetwork.com,thelm_flintstone@ispnetwork.com
+acl			:fred_blogs@myisp.com
 
 [DropboxSetup]
-dropbox_token           :dropbox token
-dropbox_app             :app name
+dropbox_token           :WibddfgzvYcAAAAAAAA4PDPJXjSlTxKJV0P39-hmRb7dJx0_Jwl_O14vohAy4_HR
+dropbox_app             :Appname
 dropbox_enabled         :1
 dropbox_folder		:/uploads/
-dropbox_keep_files	:3
-film_duration		:5
-enable_film		:1
+dropbox_keep_files	:10
+film_duration		:5000
+film_enable		:1
 dropbox_film_folder     :/film uploads/

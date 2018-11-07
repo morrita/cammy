@@ -155,7 +155,7 @@ while True:
 
         if email_okay is False:
             datestr = get_date()
-            update_file("ERROR: Email failure datected at %s\n" %  (datestr), logfile)
+            update_file("ERROR: Email failure detected at %s\n" %  (datestr), logfile)
 
     else:
         networks_okay = False 
