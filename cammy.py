@@ -193,6 +193,9 @@ while True:
             n2 = datetime.now()
             elapsed_time = (n2 - n1).total_seconds()
             if elapsed_time > email_polling:
+                datestr = get_date()
+                update_file("INFO: elapsed image scanning time has exceeded %d seconds at %s hence now checking for emails...\n" % (email_polling, datestr), logfile)
+
                 break
     else:
         time.sleep (30)
