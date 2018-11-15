@@ -586,6 +586,8 @@ def access_keepalive(verbose,keepalive_file,keepalive_action,tidy_list, logfile,
 
                     if seq > keepalive_threshold:
                        tidy_flagfiles(tidy_list, logfile)
+                       datestr = get_date()
+                       update_file("ERROR: the keepalive requests have had no responses after %d attempts at %s \n" % (seq,datestr), logfile)
                        system_shutdown(logfile,restart=True)
 
                 else:
