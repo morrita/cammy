@@ -310,9 +310,8 @@ def processEmail(email_server, email_user, email_password, logfile, keepalive_fi
 
                     senderAddress, varSubject = getEmailInfo (response_part)
                     
-                    if verbose:
-                        datestr = get_date()
-                        update_file("INFO: email received from %s, subject = %s,  at %s \n" % (senderAddress, varSubject, datestr), logfile)
+                    datestr = get_date()
+                    update_file("INFO: email received from %s, subject = %s,  at %s \n" % (senderAddress, varSubject, datestr), logfile)
 
                     if accessPermitted(senderAddress, acl, use_acl):
 
